@@ -1,144 +1,41 @@
-const connectButton = document.getElementById('connectWallet');
-const feedbackList = document.getElementById('feedbackList');
-const newFeedbackInput = document.getElementById('newFeedback');
-const submitButton = document.getElementById('submitFeedback');
+const provider = new ethers.providers.JsonRpcProvider('https://floral-alpha-season.ethereum-sepolia.quiknode.pro/bfc56c51a1137de214326963e3dfcdfa6526ccf1/');
+const signer = provider.getSigner();
 
-// Replace with your actual contract address deployed on Remix
 const contractAddress = '0xaCC7c8633ae08b2e762D1b41146051B9a652Ac6C';
-
-// Initialize Web3 provider (assuming browser has MetaMask)
-let provider = new ethers.providers.Web3Provider(window.ethereum);
-
-// Contract ABI (generated from your Solidity code)
 const abi = [
-    {
-        "inputs": [
-          {
-            "internalType": "string",
-            "name": "_content",
-            "type": "string"
-          }
-        ],
-        "name": "addFeedback",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "getFeedback",
-        "outputs": [
-          {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "author",
-                "type": "address"
-              },
-              {
-                "internalType": "string",
-                "name": "content",
-                "type": "string"
-              },
-              {
-                "internalType": "uint256",
-                "name": "timestamp",
-                "type": "uint256"
-              }
-            ],
-            "internalType": "struct Feedback.Message[]",
-            "name": "",
-            "type": "tuple[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-          }
-        ],
-        "name": "messages",
-        "outputs": [
-          {
-            "internalType": "address",
-            "name": "author",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "content",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-    
-
-
-
-  // Paste your smart contract ABI here
+    'function submitFeedback(string _message) public',
+    'function getAllFeedback() public view returns (address[] memory, string[] memory, uint256[] memory)'
 ];
+const contract = new ethers.Contract(contractAddress, abi, signer);
 
-let contract;
+const feedbackForm = document.getElementById('feedbackForm');
+const feedbackMessage = document.getElementById('feedbackMessage');
+const feedbackList = document.getElementById('feedbackList');
 
-// Connect MetaMask wallet
-connectButton.addEventListener('click', async () => {
-  try {
-    await provider.send("eth_requestAccounts", []);
-    contract = new ethers.Contract(contractAddress, abi, provider.getSigner());
-    connectButton.innerText = "Connected";
-  } catch (error) {
-    console.error("Error connecting wallet:", error);
-  }
+feedbackForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!signer) {
+        alert('Please connect your wallet');
+        return;
+    }
+
+    const tx = await contract.submitFeedback(feedbackMessage.value);
+    await tx.wait();
+
+    feedbackMessage.value = '';
+    alert('Feedback submitted successfully');
 });
 
-// Get all feedbacks on button click
-submitButton.addEventListener('click', async () => {
-  if (!contract) {
-    alert("Please connect your wallet first!");
-    return;
-  }
+async function getFeedbacks() {
+    const [senders, messages, timestamps] = await contract.getAllFeedback();
 
-  // Get feedback count
-  const feedbackCount = await contract.messages.length();
-
-  // Retrieve and display all feedbacks
-  for (let i = 0; i < feedbackCount; i++) {
-    const feedback = await contract.getFeedback(i);
-    displayFeedback(feedback[0], feedback[1], feedback[2]);
-  }
-});
-
-// Submit new feedback
-submitButton.addEventListener('click', async () => {
-  if (!contract || !newFeedbackInput.value) {
-    return;
-  }
-
-  try {
-    const tx = await contract.addFeedback(newFeedbackInput.value);
-    await tx.wait(); // Wait for transaction confirmation
-    console.log("Feedback submitted successfully!");
-    newFeedbackInput.value = ""; // Clear input field after submission
-  } catch (error) {
-    console.error("Error submitting feedback:", error);
-  }
-});
-
-// Helper function to display feedback
-function displayFeedback(author, content, timestamp) {
-  const feedbackItem = document.createElement('li');
-  feedbackItem.innerText = `Author: ${author}\nContent: ${content}\nTimestamp: ${new Date(timestamp * 1000)}`;
-  feedbackList.appendChild(feedbackItem);
+    feedbackList.innerHTML = '';
+    for (let i = 0; i < senders.length; i++) {
+        const li = document.createElement('li');
+        li.textContent = `${senders[i]}: ${messages[i]} (Timestamp: ${timestamps[i]})`;
+        feedbackList.appendChild(li);
+    }
 }
+
+getFeedbacks();
