@@ -3,84 +3,79 @@ const newFeedbackInput = document.getElementById('new-feedback');
 const submitButton = document.getElementById('submit-button');
 
 // Replace with your deployed contract address
-const contractAddress = '0xDBC3f70562d19433d6679676A4Fb0e1e2b8a2112'; // Replace with actual address
-const abi = [ 
-    
-        {
-          "inputs": [
-            {
-              "internalType": "string",
-              "name": "_content",
-              "type": "string"
-            }
-          ],
-          "name": "addFeedback",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "getFeedback",
-          "outputs": [
-            {
-              "components": [
-                {
-                  "internalType": "address",
-                  "name": "author",
-                  "type": "address"
-                },
-                {
-                  "internalType": "string",
-                  "name": "content",
-                  "type": "string"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "timestamp",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct Feedback.Message[]",
-              "name": "",
-              "type": "tuple[]"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "messages",
-          "outputs": [
-            {
-              "internalType": "address",
-              "name": "author",
-              "type": "address"
-            },
-            {
-              "internalType": "string",
-              "name": "content",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "timestamp",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-      
-
-
+const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with actual address
+const abi = [{
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_content",
+        "type": "string"
+      }
+    ],
+    "name": "addFeedback",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getFeedback",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Feedback.Message[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "messages",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "author",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "content",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
 
   // ... Paste your contract ABI here
 ];
@@ -108,6 +103,7 @@ async function getFeedback() {
   if (!provider) return;
 
   const signer = provider.getSigner();
+  console.log("Using contract address:", contractAddress);
   const contract = new ethers.Contract(contractAddress, abi, signer); // Replace 'abi' with your contract ABI
 
   try {
