@@ -2,31 +2,23 @@
 pragma solidity ^0.8.0;
 
 contract Feedback {
+    struct FeedbackEntry {
+        address sender;
+        string message;
+        uint256 timestamp;
+    }
 
-  // Structure to hold each feedback message
-  struct Message {
-    address author;
-    string content;
-    uint256 timestamp;
-  }
+    FeedbackEntry[] public feedbacks;
 
-  // Array to store all feedback messages
-  Message[] public messages;
+    event FeedbackReceived(address indexed sender, string message, uint256 timestamp);
 
-  // Function to add a new feedback message
-  function addFeedback(string memory _content) public {
-    messages.push(Message(msg.sender, _content, block.timestamp));
-  }
+    function submitFeedback(string calldata _message) external {
+        FeedbackEntry memory newFeedback = FeedbackEntry(msg.sender, _message, block.timestamp);
+        feedbacks.push(newFeedback);
+        emit FeedbackReceived(msg.sender, _message, block.timestamp);
+    }
 
-  // Function to retrieve all feedback messages
- /*
-  function getFeedback() public view returns (Message[] memory) {
-    return messages;
-  } */
-
-  function getFeedback(uint256 _index) public view returns (address, string memory, uint256){
-    Message memory item = messages[_index];
-
-    return(item.author, item.content, item.timestamp);
-  }
+    function getAllFeedback() external view returns (FeedbackEntry[] memory) {
+        return feedbacks;
+    }
 }
